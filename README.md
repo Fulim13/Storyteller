@@ -17,7 +17,7 @@ Seaborn ✅
 
 Scikit Learn (Skip)
 
-Neural Network from scratch (Still going on)
+[Neural Network from scratch (Still going on)](https://www.youtube.com/watch?v=Wo5dMEP_BbI&list=PLQVvvaa0QuDcjD5BAw2DxE6OF2tius3V3)
 
 [Origin of NLP](https://www.youtube.com/watch?v=rmVRLeJRkl4&list=PLoROMvodv4rMFqRtEuo6SGjY4XbRIVRd4)
 
