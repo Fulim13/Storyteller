@@ -1,13 +1,22 @@
-Dataset May Used:
+# Dataset May Used:
 https://huggingface.co/datasets/roneneldan/TinyStories
 
-Learning Path
+
+
+# Learning Path
+
 Python ✅✅
+
 Numpy ✅
+
 Pandas✅
+
 Matplotlib ✅
+
 Seaborn ✅
+
 Scikit Learn (Skip)
+
 Neural Network from scratch (Still going on)
 
 [Origin of NLP](https://www.youtube.com/watch?v=rmVRLeJRkl4&list=PLoROMvodv4rMFqRtEuo6SGjY4XbRIVRd4)
