@@ -1,0 +1,5 @@
+# Virtual Environment
+story-teller
+.env
+__pycache__
+chroma

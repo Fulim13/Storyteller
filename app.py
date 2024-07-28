@@ -1,25 +1,54 @@
-import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import argparse
+from langchain_openai import OpenAIEmbeddings
+from langchain_chroma import Chroma
+from langchain.prompts import ChatPromptTemplate
 
-# initialize tokenizer and model from pretrained GPT2 model from Huggingface
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-model = GPT2LMHeadModel.from_pretrained('gpt2', pad_token_id=tokenizer.eos_token_id)
+from get_llm import get_llm
 
-# sentence
-sequence = "write a romantice story about a couple who met in a coffee shop."
-# sequence = input("Enter a sentence: ")
+CHROMA_PATH = "chroma"
 
-# encoding sentence for model to process
-inputs = tokenizer.encode(sequence, return_tensors='pt')
+PROMPT_TEMPLATE = """
+Answer the question based only on the following context:
 
-# generating text
-outputs = model.generate(inputs, max_length=100000000, do_sample=True, num_beams=5, no_repeat_ngram_size=2, early_stopping=False)
+{context}
 
-# decoding text
-text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-# printing output
-print("\n")
-print(text)
+---
 
-# https://medium.com/@majd.farah08/generating-text-with-gpt2-in-under-10-lines-of-code-5725a38ea685
-# https://www.kaggle.com/code/tuckerarrants/text-generation-with-huggingface-gpt2
+Answer the question based on the above context: {question}
+"""
+
+def main():
+     # Create CLI.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("query_text", type=str, help="The query text.")
+    args = parser.parse_args()
+    query_text = args.query_text
+
+    # Load Vector DB
+    embedding_function = OpenAIEmbeddings()
+    db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+
+    # Get Similar Chunks
+    results = db.similarity_search_with_relevance_scores(query_text, k=3)
+    if len(results) == 0 or results[0][1] < 0.7:
+        print(f"Unable to find matching results.")
+        return
+    
+    # Create Prompt Template
+    context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
+    
+    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+
+    prompt = prompt_template.format(context=context_text, question=query_text)
+    # print(prompt)
+
+    llm = get_llm()
+    response = llm.invoke(prompt)
+
+    sources = [doc.metadata.get("source", None) for doc, _score in results]
+    formatted_response = f"Response: {response}\nSources: {sources}"
+    print(formatted_response)
+
+
+if __name__ == "__main__":
+    main()
