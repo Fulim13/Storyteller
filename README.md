@@ -1,6 +1,6 @@
 # Setup For Ollama
 
-1. Create a new virtual environment `python -m venv story-teller`
+1. Create a new virtual environment `python -m venv storyteller`
 2. Install the requirements `pip install -r requirements.txt`
 3. Install Ollama from Ollama's official repository [Download Link](https://github.com/ollama/ollama)
 4. Run `ollama pull llama3` to download the model
@@ -10,7 +10,7 @@
 
 # Setup For Open AI
 
-1. Create a new virtual environment `python -m venv story-teller`
+1. Create a new virtual environment `python -m venv storyteller`
 2. Install the requirements `pip install -r requirements.txt`
 3. Create .env file and add the following variables
 
@@ -27,4 +27,3 @@ OPENAI_API_KEY=your_secret_key
 1. How does Alice meet the Mad Hatter?
 2. What happens when Alice first falls down the rabbit hole?
 3. Describe the tea party scene with the Mad Hatter and the March Hare.
-
