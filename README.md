@@ -21,6 +21,6 @@ docker compose up
 
 5. Agent - tools (TavilySearch, Wikipedia...)
 6. Optional - Callback (Count token to limit token usage, 1 people 100000 token)
-7. Export
+7. Export PDF
 
 - Update Memory Implementation to mongo db
