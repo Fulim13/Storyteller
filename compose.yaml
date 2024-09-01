@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+
+    volumes:
+      - ./data/db:/var/lib/postgresql/data/
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ./web:/app/web
+
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./api:/app/api
+
+    depends_on:
+      - db
