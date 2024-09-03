@@ -10,6 +10,7 @@ import {
   MessageList,
   Message,
   Avatar,
+  TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
 
 import Button from "react-bootstrap/Button";
@@ -23,45 +24,52 @@ function App() {
   const [genre, setGenre] = useState("Fantasy");
   const [temperature, setTemperature] = useState(0.0);
   const [model, setModel] = useState("gpt-3.5-turbo");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Fetch initial data or previous messages if needed
   }, []);
 
   const handleSendMessage = () => {
+    // Add the outgoing message to the data immediately
+    const outgoingMessage = {
+      direction: "outgoing",
+      message: inputMessage,
+      position: "single",
+      sender: "You",
+      sentTime: new Date().toLocaleTimeString(),
+    };
+
+    setData([...data, outgoingMessage]);
+    setInputMessage(""); // Clear the input field right away
+    setIsLoading(true);
+
+    // Proceed to send the message to the backend
     fetch("http://localhost:8000/test/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: inputMessage,
+        message: outgoingMessage.message,
         genre: genre,
         temperature: temperature,
         model: model,
-      }), // Send the genre
+      }),
     })
       .then((res) => res.json())
       .then((response) => {
         console.log(response); // Log the response to inspect its structure
-        setData([
-          ...data,
-          {
-            direction: "outgoing",
-            message: inputMessage,
-            position: "single",
-            sender: "You",
-            sentTime: new Date().toLocaleTimeString(),
-          },
-          {
-            direction: "incoming",
-            message: `Characters:\n${response.data.characters}\n\nPlot:\n${response.data.plot}\n\nScenes:\n${response.data.scenes}`,
-            position: "single",
-            sender: "Assistant",
-            sentTime: new Date().toLocaleTimeString(),
-          },
-        ]);
-        setInputMessage(""); // Clear the input field
+        // Add the incoming response to the data
+        const incomingMessage = {
+          direction: "incoming",
+          message: `Characters:\n${response.data.characters}\n\nPlot:\n${response.data.plot}\n\nScenes:\n${response.data.scenes}`,
+          position: "single",
+          sender: "Assistant",
+          sentTime: new Date().toLocaleTimeString(),
+        };
+        setData((prevData) => [...prevData, incomingMessage]);
+        setIsLoading(false);
       });
   };
 
@@ -96,7 +104,13 @@ function App() {
             width: "800px",
           }}
         >
-          <MessageList>
+          <MessageList
+            typingIndicator={
+              isLoading ? (
+                <TypingIndicator content="Response is generating" />
+              ) : null
+            }
+          >
             {data.map((msg, index) => (
               <Message
                 key={index}
