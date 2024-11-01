@@ -14,7 +14,7 @@ docker compose up
 - Ask any question about current generated stories
 - locate commit certain commit point
 
-4. Character Image Generation (Priority: 1)
+4. Character Image Generation (Priority: 1)✅
 
 - document chain (Summarize, map reduce)
 - Dalle
