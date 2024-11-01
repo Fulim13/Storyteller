@@ -11,7 +11,7 @@ import json
 from operator import itemgetter
 load_dotenv()
 # memory = ConversationSummaryMemory(llm=ChatOpenAI(temperature=0, model="gpt-3.5-turbo"))
-memory = ConversationBufferMemory()
+# memory = ConversationBufferMemory()
 
 @api_view(['POST'])
 def send_some_data(request):
@@ -43,12 +43,13 @@ def send_some_data(request):
     # Load previous memory
     previous_context = str(memory.load_memory_variables({}))
 
+    # If needed memory, you can set this prompt
+    #   Here is the context from our previous conversation:
+    # {previous_context}
+
     # Create the subchains:
     character_generation_prompt = ChatPromptTemplate.from_template(
         """
-    Here is the context from our previous conversation:
-    {previous_context}
-
     I want you to brainstorm three to five characters for my short story. The
     genre is {genre}. Each character must have a Name and a Biography.
     You must provide a name and biography for each character, this is very
@@ -66,8 +67,6 @@ def send_some_data(request):
 
     plot_generation_prompt = ChatPromptTemplate.from_template(
         """
-    Here is the context from our previous conversation:
-    {previous_context}
 
     Given the following characters and the genre, create an effective
     plot for a short story:
@@ -83,9 +82,6 @@ def send_some_data(request):
 
     scene_generation_plot_prompt = ChatPromptTemplate.from_template(
         """
-    Here is the context from our previous conversation:
-    {previous_context}
-
     Act as an effective content creator.
     Given multiple characters and a plot, you are responsible for
     generating the various scenes for each act.
