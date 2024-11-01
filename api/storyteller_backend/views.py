@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from langchain_core.prompts.chat import ChatPromptTemplate
 import json
 from operator import itemgetter
+from openai import OpenAI
+import os
 load_dotenv()
 # memory = ConversationSummaryMemory(llm=ChatOpenAI(temperature=0, model="gpt-3.5-turbo"))
 # memory = ConversationBufferMemory()
@@ -41,7 +43,7 @@ def send_some_data(request):
     llm = request.data.get('model', 'gpt-3.5-turbo')
 
     # Load previous memory
-    previous_context = str(memory.load_memory_variables({}))
+    # previous_context = str(memory.load_memory_variables({}))
 
     # If needed memory, you can set this prompt
     #   Here is the context from our previous conversation:
@@ -50,7 +52,7 @@ def send_some_data(request):
     # Create the subchains:
     character_generation_prompt = ChatPromptTemplate.from_template(
         """
-    I want you to brainstorm three to five characters for my short story. The
+    I want you to brainstorm 2 characters for my short story. The
     genre is {genre}. Each character must have a Name and a Biography.
     You must provide a name and biography for each character, this is very
     important!
@@ -115,18 +117,23 @@ def send_some_data(request):
     scene_generation_plot_chain = (scene_generation_plot_prompt
                                  | model
                                  | StrOutputParser())
-    master_chain = ({"characters": character_generation_chain, "genre": RunnablePassthrough(), "user_input": RunnablePassthrough(), "previous_context": RunnablePassthrough()}
+    master_chain = ({
+        "characters": character_generation_chain,
+        "genre": RunnablePassthrough(),
+        "user_input": RunnablePassthrough(),
+        # "previous_context": RunnablePassthrough()
+        }
         | RunnableParallel(
         characters=itemgetter("characters"),
         user_input=itemgetter("user_input"),
         genre=itemgetter("genre"),
-        previous_context=itemgetter("previous_context"),
+        # previous_context=itemgetter("previous_context"),
         plot=plot_generation_chain,  # Generate plot based on characters and genre
         ) | RunnableParallel(
         characters=itemgetter("characters"),
         genre=itemgetter("genre"),
         user_input=itemgetter("user_input"),
-        previous_context=itemgetter("previous_context"),
+        # previous_context=itemgetter("previous_context"),
         plot=itemgetter("plot"),
         scenes=scene_generation_plot_chain,  # Generate scenes based on characters, plot, and genre
         )
@@ -136,15 +143,19 @@ def send_some_data(request):
     )
     print(user_input)
 
-    story_result = master_chain.invoke({"genre": genre, "user_input": user_input, "previous_context": previous_context})
+    story_result = master_chain.invoke({
+        "genre": genre,
+        "user_input": user_input,
+        # "previous_context": previous_context
+        })
 
     print(story_result)
 
      # Ensure the output is a string
-    story_result_str = json.dumps(story_result) if isinstance(story_result, (dict, list)) else str(story_result)
+    # story_result_str = json.dumps(story_result) if isinstance(story_result, (dict, list)) else str(story_result)
 
     # Save the new context to memory
-    memory.save_context({"input": input_message}, {"output": story_result_str})
+    # memory.save_context({"input": input_message}, {"output": story_result_str})
 
     return Response({
         "data": story_result
