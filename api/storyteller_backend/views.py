@@ -10,7 +10,9 @@ from langchain_core.prompts.chat import ChatPromptTemplate
 import json
 from operator import itemgetter
 from openai import OpenAI
+# from PyPDF2 import PdfReader
 import os
+
 load_dotenv()
 # memory = ConversationSummaryMemory(llm=ChatOpenAI(temperature=0, model="gpt-3.5-turbo"))
 # memory = ConversationBufferMemory()
@@ -193,3 +195,20 @@ def generate_character_image(request):
             "success": False,
             "error": str(e)
         }, status=500)
+
+
+# @api_view(['POST'])
+# def upload_pdf(request):
+#     pdf_file = request.FILES['pdf_file']
+
+#     # Save the uploaded PDF file to the 'uploads' directory
+#     with open(f'uploads/{pdf_file.name}', 'wb+') as destination:
+#         for chunk in pdf_file.chunks():
+#             destination.write(chunk)
+
+
+
+#     return Response({
+#         "data": pdf_content
+#     })
+# INstaed of saving the pdf file to the uploads directory, we can extract the text from the pdf file and return it as a response
