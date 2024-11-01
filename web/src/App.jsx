@@ -3,19 +3,21 @@ import { useState, useEffect } from "react";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { Gitgraph } from "@gitgraph/react";
+// import { Gitgraph } from "@gitgraph/react";
 
 import {
   ChatContainer,
   MessageList,
   Message,
   Avatar,
+  TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
 
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormRange from "react-bootstrap/FormRange";
+import Modal from "react-bootstrap/Modal";
 
 function App() {
   const [data, setData] = useState([]);
@@ -23,45 +25,119 @@ function App() {
   const [genre, setGenre] = useState("Fantasy");
   const [temperature, setTemperature] = useState(0.0);
   const [model, setModel] = useState("gpt-3.5-turbo");
+  const [isLoading, setIsLoading] = useState(false);
+  const [characters, setCharacters] = useState();
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [characterImages, setCharacterImages] = useState({});
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
 
   useEffect(() => {
     // Fetch initial data or previous messages if needed
   }, []);
 
+  const parseCharacters = (message) => {
+    // Extract character information from the message
+    console.log("Raw message:", message); // Debug log
+
+    const characterSection = message
+      .split("Characters:\n")[1]
+      ?.split("\n\nPlot:")[0];
+    console.log("Character section:", characterSection); // Debug log
+
+    if (!characterSection) {
+      console.log("No character section found"); // Debug log
+      return [];
+    }
+
+    const parsedCharacters = characterSection
+      .split("\n\n") // Split by double newline to get each character block
+      .map((block) => {
+        const nameMatch = block.match(/Name:\s*(.+)/);
+        const biographyMatch = block.match(/Biography:\s*(.+)/s);
+
+        return {
+          name: nameMatch ? nameMatch[1].trim() : "",
+          biography: biographyMatch ? biographyMatch[1].trim() : "",
+        };
+      })
+      .filter((character) => character.name && character.biography);
+
+    console.log("Parsed characters:", parsedCharacters); // Debug log
+    return parsedCharacters;
+  };
+
+  const handleGenerateImages = async () => {
+    setIsGeneratingImages(true);
+    setShowImageModal(true);
+    const newCharacterImages = {};
+
+    for (const character of characters) {
+      try {
+        const response = await fetch("http://localhost:8000/generate-image/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: character.name,
+            biography: character.biography,
+            genre: genre,
+          }),
+        });
+        const data = await response.json();
+        newCharacterImages[character.name] = data.image_url;
+      } catch (error) {
+        console.error(`Error generating image for ${character.name}:`, error);
+      }
+    }
+
+    setCharacterImages(newCharacterImages);
+    setIsGeneratingImages(false);
+  };
+
   const handleSendMessage = () => {
+    const outgoingMessage = {
+      direction: "outgoing",
+      message: inputMessage,
+      position: "single",
+      sender: "You",
+      sentTime: new Date().toLocaleTimeString(),
+    };
+
+    setData([...data, outgoingMessage]);
+    setInputMessage("");
+    setIsLoading(true);
+
     fetch("http://localhost:8000/test/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: inputMessage,
+        message: outgoingMessage.message,
         genre: genre,
         temperature: temperature,
         model: model,
-      }), // Send the genre
+      }),
     })
       .then((res) => res.json())
       .then((response) => {
-        console.log(response); // Log the response to inspect its structure
-        setData([
-          ...data,
-          {
-            direction: "outgoing",
-            message: inputMessage,
-            position: "single",
-            sender: "You",
-            sentTime: new Date().toLocaleTimeString(),
-          },
-          {
-            direction: "incoming",
-            message: `Characters:\n${response.data.characters}\n\nPlot:\n${response.data.plot}\n\nScenes:\n${response.data.scenes}`,
-            position: "single",
-            sender: "Assistant",
-            sentTime: new Date().toLocaleTimeString(),
-          },
-        ]);
-        setInputMessage(""); // Clear the input field
+        console.log("API Response:", response.data); // Debug log
+
+        const incomingMessage = {
+          direction: "incoming",
+          message: `Characters:\n${response.data.characters}\n\nPlot:\n${response.data.plot}\n\nScenes:\n${response.data.scenes}`,
+          position: "single",
+          sender: "Assistant",
+          sentTime: new Date().toLocaleTimeString(),
+        };
+
+        console.log("Incoming message:", incomingMessage.message); // Debug log
+
+        setData((prevData) => [...prevData, incomingMessage]);
+        const parsedChars = parseCharacters(incomingMessage.message);
+        setCharacters(parsedChars);
+        setIsLoading(false);
       });
   };
 
@@ -90,13 +166,14 @@ function App() {
         <header>
           <p>Chat Interface</p>
         </header>
-        <ChatContainer
-          style={{
-            height: "500px",
-            width: "800px",
-          }}
-        >
-          <MessageList>
+        <ChatContainer style={{ height: "500px", width: "800px" }}>
+          <MessageList
+            typingIndicator={
+              isLoading ? (
+                <TypingIndicator content="Response is generating" />
+              ) : null
+            }
+          >
             {data.map((msg, index) => (
               <Message
                 key={index}
@@ -119,6 +196,22 @@ function App() {
             ))}
           </MessageList>
         </ChatContainer>
+
+        {/* Modified button code */}
+        {characters && characters.length > 0 ? (
+          <Button
+            variant="primary"
+            onClick={handleGenerateImages}
+            className="mt-3 mb-3"
+            disabled={isGeneratingImages}
+          >
+            {isGeneratingImages
+              ? "Generating Images..."
+              : "Generate Character Images"}
+          </Button>
+        ) : (
+          <div style={{ display: "none" }}>No characters available</div>
+        )}
 
         <Form.Select
           aria-label="Select genre"
@@ -175,6 +268,37 @@ function App() {
             </div>
           ))}
         </Form>
+        <Modal
+          show={showImageModal}
+          onHide={() => setShowImageModal(false)}
+          size="lg"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Character Images</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {isGeneratingImages ? (
+              <div className="text-center">
+                <p>Generating character images...</p>
+                {/* You could add a spinner here */}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(characterImages).map(([name, imageUrl]) => (
+                  <div key={name} className="text-center">
+                    <h4>{name}</h4>
+                    <img
+                      src={imageUrl}
+                      alt={name}
+                      className="max-w-full h-auto rounded"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </Modal.Body>
+        </Modal>
         <InputGroup className="mb-3">
           <Form.Control
             placeholder="Type your message here"
