@@ -141,6 +141,38 @@ function App() {
       });
   };
 
+  //   const handlePdfUpload = async (event) => {
+  //     const file = event.target.files[0];
+  //     if (file) {
+  //       const formData = new FormData();
+  //       formData.append("file", file);
+
+  //       try {
+  //         const response = await fetch("/api/upload-pdf", {
+  //           method: "POST",
+  //           body: formData,
+  //         });
+
+  //         if (!response.ok) {
+  //           throw new Error("Network response was not ok");
+  //         }
+
+  //         const data = await response.json();
+  //         console.log("File uploaded successfully", data);
+  //         const incomingMessage = {
+  //           direction: "incoming",
+  //           message: `Characters:\n${data.characters}\n\nPlot:\n${response.data.plot}\n\nScenes:\n${response.data.scenes}`,
+  //           position: "single",
+  //           sender: "Assistant",
+  //           sentTime: new Date().toLocaleTimeString(),
+  //         };
+  //         setData((prevData) => [...prevData, incomingMessage]);
+  //       } catch (error) {
+  //         console.error("Error uploading file", error);
+  //       }
+  //     }
+  //   };
+
   return (
     <div className="flex justify-center gap-4">
       {/* <Gitgraph>
@@ -315,6 +347,13 @@ function App() {
             Send
           </Button>
         </InputGroup>
+        {/* <InputGroup className="mb-3">
+          <Form.Control
+            type="file"
+            accept="application/pdf"
+            onChange={handlePdfUpload}
+          />
+        </InputGroup> */}
       </div>
     </div>
   );

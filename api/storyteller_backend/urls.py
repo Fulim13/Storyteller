@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('test/', views.send_some_data),
     path('generate-image/', views.generate_character_image),
+    # path('upload-pdf/', views.upload_pdf),
 ]
