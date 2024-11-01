@@ -122,8 +122,7 @@ def send_some_data(request):
         genre=itemgetter("genre"),
         previous_context=itemgetter("previous_context"),
         plot=plot_generation_chain,  # Generate plot based on characters and genre
-        )
-        | RunnableParallel(
+        ) | RunnableParallel(
         characters=itemgetter("characters"),
         genre=itemgetter("genre"),
         user_input=itemgetter("user_input"),
@@ -150,3 +149,36 @@ def send_some_data(request):
     return Response({
         "data": story_result
     })
+
+@api_view(['POST'])
+def generate_character_image(request):
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+    name = request.data.get('name', '')
+    biography = request.data.get('biography', '')
+    genre = request.data.get('genre', '')
+
+    # Create a detailed prompt for DALL-E
+    prompt = f"A character portrait in {genre} style. The character is {name}, who is {biography}. The image should be detailed and high quality, showing the character's distinctive features and personality."
+
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
+
+        image_url = response.data[0].url
+
+        return Response({
+            "success": True,
+            "image_url": image_url
+        })
+
+    except Exception as e:
+        return Response({
+            "success": False,
+            "error": str(e)
+        }, status=500)
