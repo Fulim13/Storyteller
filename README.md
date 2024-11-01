@@ -28,7 +28,9 @@ docker compose up
 Progress Result:
 
 # Generate Stories
-![chrome_5GX2g6Dbam](https://github.com/user-attachments/assets/f97c0f51-324c-4adf-9ea6-e65a19e5c5d6)
+![image](https://github.com/user-attachments/assets/1d076280-1d05-4fa6-a380-f39a98939d14)
+
 
 # Generate Character Image
-![chrome_0D5EPGMGQl](https://github.com/user-attachments/assets/f507134b-8298-45ab-801e-4f2d788ceec9)
+![image](https://github.com/user-attachments/assets/b28f7066-4b43-4242-9f96-bc2aae4834cf)
+
