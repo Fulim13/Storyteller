@@ -14,7 +14,7 @@ docker compose up
 - Ask any question about current generated stories
 - locate commit certain commit point
 
-4. Character Image Generation✅
+4. Character Image Generation✅ -> ❗❗❗Futher Improvemnt: Generate in another tab and can export to png
 
 - document chain (Summarize, map reduce)
 - Dalle
