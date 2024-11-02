@@ -8,7 +8,7 @@ docker compose up
 
 0. Selection of Model (Add on other model, Fine-tune model, mistral-ai, Ollama)
   - Fine Tune Method
-    1. SFT (Supervised Fine Tuning)
+    1. PERT
     2. QLoRa
     3. RLHF
     4. DPO
