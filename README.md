@@ -7,6 +7,7 @@ docker compose up
 # Current Scope
 Priority
 Text -> Image
+❓ Thinking about Recontruct my python WSL environment
 
 Include Chapter and Remove Scene
 1. Selection of Topic , Genre (Romantic ...) 
