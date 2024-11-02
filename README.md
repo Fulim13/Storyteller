@@ -4,7 +4,34 @@
 docker compose up
 ```
 
-# Task to do
+# Current Scope
+Priority
+Text -> Image
+
+Include Chapter and Remove Scene
+1. Selection of Topic , Genre (Romantic ...) 
+- Selection of Candidate of Topic
+(Accuracy Topic based on the genre (EG: if possible to generate all the same topic based on genre, it consider high accuracy)
+2. Generate Characters Description and Photo (Able to change the photo of characters)
+3. Generate Table of Content
+4. Generate Chapter
+5. Generate Chapter Content
+
+Metric(Image, Text)
+- Prompt to Output
+- Accuracy of Text Generation 
+
+- Accuracy of Image Generation 
+(List down the accuracy of generated image based on the prompt)
+(May only limit to color , EG hair color, color of costume)
+
+Limit (10 pages of stories)
+- limit by number of words/stories
+- limit number of characters
+
+---
+
+# Task to do (Archived)
 
 0. Selection of Model (Add on other model, Fine-tune model, mistral-ai, Ollama)
   - Fine Tune Method
