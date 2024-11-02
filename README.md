@@ -7,9 +7,14 @@ docker compose up
 # Task to do
 
 0. Selection of Model (Add on other model, Fine-tune model, mistral-ai, Ollama)
-1. Upload PDF <- Current Progess⭐
-2. Commit point (time travel) (Priority: 1)
-3. Q&A
+  - Fine Tune Method
+    1. SFT (Supervised Fine Tuning)
+    2. QLoRa
+    3. RLHF
+    4. DPO
+2. Upload PDF <- Current Progess⭐
+3. Commit point (time travel) (Priority: 1)
+4. Q&A
 
 - Ask any question about current generated stories
 - locate commit certain commit point
