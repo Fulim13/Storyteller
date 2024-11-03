@@ -172,7 +172,14 @@ def generate_character_image(request):
     genre = request.data.get('genre', '')
 
     # Create a detailed prompt for DALL-E
-    prompt = f"A character portrait in {genre} style. The character is {name}, who is {biography}. The image should be detailed and high quality, showing the character's distinctive features and personality."
+    # prompt = f"A character portrait in {genre} style. The character is {name}, who is {biography}. The image should be detailed and high quality, showing the character's distinctive features and personality."
+    prompt = f"""A highly detailed character portrait in {genre} style.
+    The character is {name}, with a background in {biography}.
+    1. First, identify the character's gender and race based on the provided biography, giving them features that align with that ethnicity
+    (e.g., Asian features for a Korean character, European features for a German character).
+    2. Make the image realistic rather than anime, with lifelike human details and expressions that showcase the character’s unique personality and backstory.
+    The portrait should focus on capturing their distinctive traits and emotional depth, with high-quality textures and lighting.
+    Their age should around 20 to 40 years old"""
 
     try:
         response = client.images.generate(
