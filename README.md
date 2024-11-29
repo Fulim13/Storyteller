@@ -1,3 +1,9 @@
+# Current task
+
+1. UI
+2. Resize Image
+3. Evaluation
+
 # Run the project locally
 
 ```

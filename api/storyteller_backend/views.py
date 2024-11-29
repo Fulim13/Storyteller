@@ -12,34 +12,61 @@ from operator import itemgetter
 from openai import OpenAI
 # from PyPDF2 import PdfReader
 import os
+from .story_outline_generation import StoryOutlineGenerator
+from .expert_interview_chain import InterviewChain
 
 load_dotenv()
 # memory = ConversationSummaryMemory(llm=ChatOpenAI(temperature=0, model="gpt-3.5-turbo"))
 # memory = ConversationBufferMemory()
 
+
 @api_view(['POST'])
 def send_some_data(request):
+    input_message = request.data.get('message', '')
+    # Default to 'Fantasy' if not provided
+    genre = request.data.get('genre', 'Fantasy')
+    # user_input = request.data.get('message', '')
+    # temperature = request.data.get('temperature', 0.0)
+    # llm = request.data.get('model', 'gpt-3.5-turbo')
+
+    interview_chain = InterviewChain(topic=input, genre=genre)
+    interview_questions = interview_chain()
+
+    # Note: Here we need to send back the interview questions to the user to let them asnwer the question
+
+    blog_outline_generator = StoryOutlineGenerator(
+        input=input_message, genre=genre, interview_questions_and_answers=interview_questions)
+    outline_result = blog_outline_generator.generate_outline()
+
+    return Response({
+        "data": outline_result
+    })
+
+
+@api_view(['POST'])
+def archive_send_some_data(request):
 
     model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo").configurable_alternatives(
-    ConfigurableField(id="llm"),
-    default_key="gpt-3.5-turbo",
-    gpt4=ChatOpenAI(temperature=0, model="gpt-4").configurable_fields(
+        ConfigurableField(id="llm"),
+        default_key="gpt-3.5-turbo",
+        gpt4=ChatOpenAI(temperature=0, model="gpt-4").configurable_fields(
+            temperature=ConfigurableField(
+                id="temperature",
+                name="LLM Temperature",
+                description="The temperature of the LLM",
+            )
+        )).configurable_fields(
         temperature=ConfigurableField(
             id="temperature",
             name="LLM Temperature",
             description="The temperature of the LLM",
         )
-    )).configurable_fields(
-    temperature=ConfigurableField(
-        id="temperature",
-        name="LLM Temperature",
-        description="The temperature of the LLM",
-        )
     )
 
     # Extract message and genre from the request
     input_message = request.data.get('message', '')
-    genre = request.data.get('genre', 'Fantasy')  # Default to 'Fantasy' if not provided
+    # Default to 'Fantasy' if not provided
+    genre = request.data.get('genre', 'Fantasy')
     user_input = request.data.get('message', '')
     temperature = request.data.get('temperature', 0.0)
     llm = request.data.get('model', 'gpt-3.5-turbo')
@@ -111,34 +138,35 @@ def send_some_data(request):
     )
 
     character_generation_chain = (character_generation_prompt
-                                | model
-                                | StrOutputParser())
+                                  | model
+                                  | StrOutputParser())
     plot_generation_chain = (plot_generation_prompt
-                           | model
-                           | StrOutputParser())
+                             | model
+                             | StrOutputParser())
     scene_generation_plot_chain = (scene_generation_plot_prompt
-                                 | model
-                                 | StrOutputParser())
+                                   | model
+                                   | StrOutputParser())
     master_chain = ({
         "characters": character_generation_chain,
         "genre": RunnablePassthrough(),
         "user_input": RunnablePassthrough(),
         # "previous_context": RunnablePassthrough()
-        }
+    }
         | RunnableParallel(
         characters=itemgetter("characters"),
         user_input=itemgetter("user_input"),
         genre=itemgetter("genre"),
         # previous_context=itemgetter("previous_context"),
         plot=plot_generation_chain,  # Generate plot based on characters and genre
-        ) | RunnableParallel(
+    ) | RunnableParallel(
         characters=itemgetter("characters"),
         genre=itemgetter("genre"),
         user_input=itemgetter("user_input"),
         # previous_context=itemgetter("previous_context"),
         plot=itemgetter("plot"),
-        scenes=scene_generation_plot_chain,  # Generate scenes based on characters, plot, and genre
-        )
+        # Generate scenes based on characters, plot, and genre
+        scenes=scene_generation_plot_chain,
+    )
     ).with_config(
         temperature=temperature,
         llm=llm
@@ -149,11 +177,11 @@ def send_some_data(request):
         "genre": genre,
         "user_input": user_input,
         # "previous_context": previous_context
-        })
+    })
 
     print(story_result)
 
-     # Ensure the output is a string
+    # Ensure the output is a string
     # story_result_str = json.dumps(story_result) if isinstance(story_result, (dict, list)) else str(story_result)
 
     # Save the new context to memory
@@ -162,6 +190,7 @@ def send_some_data(request):
     return Response({
         "data": story_result
     })
+
 
 @api_view(['POST'])
 def generate_character_image(request):
@@ -212,7 +241,6 @@ def generate_character_image(request):
 #     with open(f'uploads/{pdf_file.name}', 'wb+') as destination:
 #         for chunk in pdf_file.chunks():
 #             destination.write(chunk)
-
 
 
 #     return Response({
