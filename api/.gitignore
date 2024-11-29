@@ -3,3 +3,5 @@ storyteller
 .env
 __pycache__
 chroma
+datasets/
+myenv/
