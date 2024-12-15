@@ -21,11 +21,13 @@ class OnlyStoreAIMemory(ConversationSummaryBufferMemory):
 class StoryGenerator:
     def __init__(
         self,
+        genre: str,
         topic: str,
         outline: Any,
         questions_and_answers: dict,
         characters,
     ):
+        self.genre = genre
         self.topic = topic
         self.outline = outline
         self.questions_and_answers = questions_and_answers
@@ -33,7 +35,7 @@ class StoryGenerator:
 
         prompt = f"""
         Act as a Story writer.
-        You are currently writing a story on topic: {self.topic}.
+        You are currently writing a story on topic: {self.topic} which genre {self.genre}.
         This is the outline of the blog post: {self.outline.json()}. You will be responsible for writing the story sections.
         ---
         Use your previous AI messages to avoid repeating yourself as you continually re-write the blog post sections.
